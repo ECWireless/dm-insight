@@ -6,9 +6,9 @@ from gql.transport.aiohttp import AIOHTTPTransport
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-SUBGRAPH_URL = os.getenv('SUBGRAPH_URL')
 
-transport = AIOHTTPTransport(url=SUBGRAPH_URL)
+transport = AIOHTTPTransport(
+    url='https://api.thegraph.com/subgraphs/name/ecwireless/raidguild')
 
 intents = discord.Intents.default()
 intents.message_content = True

@@ -17,9 +17,15 @@ client = discord.Client(intents=intents)
 
 query = gql(
     """
-        query {
-            members(where: {shares: 0}) {
+        query getMember ($member: ID!) {
+            member(id: $member) {
                 id
+                dateJoined
+                delegateKey
+                shares
+                loot
+                highestIndexYesVote
+                jailed
            }
         }
     """
@@ -31,16 +37,20 @@ async def on_ready():
     print(f'We have logged in as {client.user}')
 
 
-async def get_data():
+async def get_member(memberAddress):
     async with Client(
         transport=transport,
         fetch_schema_from_transport=True,
     ) as session:
-        result = await session.execute(query)
-        members = result['members']
-        if members:
-            return members
-        return None
+        try:
+            params = {"member": memberAddress}
+            result = await session.execute(query, variable_values=params)
+            member = result['member']
+            if member:
+                return member
+            return None
+        except:
+            return None
 
 
 @client.event
@@ -48,12 +58,13 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('$get_members'):
-        members = await get_data()
-        if members:
-            await message.channel.send(members[0])
+    if message.content.startswith('$get_member'):
+        address = message.content.split(' ')[1]
+        member = await get_member(address)
+        if member:
+            await message.channel.send(member)
             return
-        await message.channel.send('No members!')
+        await message.channel.send('Not a member!')
 
 
 client.run(TOKEN)

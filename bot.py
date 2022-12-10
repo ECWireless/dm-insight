@@ -3,6 +3,7 @@ import discord
 from dotenv import load_dotenv
 from gql import Client, gql
 from gql.transport.aiohttp import AIOHTTPTransport
+from datetime import datetime
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -62,7 +63,7 @@ async def on_message(message):
         address = message.content.split(' ')[1]
         member = await get_member(address)
         if member:
-            await message.channel.send(member)
+            await message.channel.send(f"Member address: {member['id']}\nDate joined: {datetime.fromtimestamp(int(member['dateJoined']) / 1000).strftime('%d-%m-%Y')}\nShares: {member['shares']}\nLoot: {member['loot']}\nJailed: {member['jailed']}\n\nVisit https://app.daohaus.club/dao/0x64/0xfe1084bc16427e5eb7f13fc19bcd4e641f7d571f/profile/{member['id']} to view profile.")
             return
         await message.channel.send('Not a member!')
 

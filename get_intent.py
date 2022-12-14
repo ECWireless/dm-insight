@@ -62,5 +62,7 @@ async def detect_intent_texts(agent, session_id, texts, language_code):
         ]
         # print(f"Response text: {' '.join(response_messages)}\n")
         if 'get_member' in response_messages:
-            return True
+            return 'get_member'
+        if 'get_all_members' in response_messages:
+            return 'get_all_members'
     return False

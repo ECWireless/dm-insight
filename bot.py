@@ -25,6 +25,8 @@ async def ask_command(interaction, question, ephemeral):
     if is_get_member_intent:
         addresses = re.findall(
             pattern='0x[a-fA-F0-9]{40}$', string=question.replace("?", ""))
+        if len(addresses) == 0:
+            return await interaction.response.send_message("Not a member!", ephemeral=ephemeral)
         address = addresses[0]
         member = await get_member(address)
         if member:

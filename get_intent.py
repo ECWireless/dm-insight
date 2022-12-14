@@ -23,7 +23,7 @@ async def run_intent_session(question):
     agent = f"projects/{project_id}/locations/{location_id}/agents/{agent_id}"
     # For more information on sessions see https://cloud.google.com/dialogflow/cx/docs/concept/session
     session_id = uuid.uuid4()
-    texts = ["Hello", question]
+    texts = [question]
     # For more supported languages see https://cloud.google.com/dialogflow/es/docs/reference/language
     language_code = "en-us"
 

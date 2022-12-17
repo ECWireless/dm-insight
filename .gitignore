@@ -2,3 +2,4 @@ venv
 .env
 google-credentials.json
 __pycache__
+rg_treasury.csv

@@ -1,14 +1,15 @@
 import os
 import io
 import re
+from datetime import datetime
 import discord
 from discord import app_commands
 from dotenv import load_dotenv
-from datetime import datetime
 
 from get_member import get_member
 from get_members import get_all_members
 from get_intent import run_intent_session
+from get_books import get_treasury_csv
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -42,6 +43,11 @@ async def ask_command(interaction, question, ephemeral):
         buffer = io.BytesIO(members.encode())
         file = discord.File(buffer, filename="members_data.csv")
         return await interaction.response.send_message(f"Original question: *{question}*\n\nHere is the data for all members.", file=file, ephemeral=ephemeral)
+    elif intent == 'get_books':
+        treasury_csv = await get_treasury_csv()
+        buffer = io.BytesIO(treasury_csv.encode())
+        file = discord.File(buffer, filename="rg_treasury.csv")
+        return await interaction.response.send_message(f"Original question: *{question}*\n\nHere is RaidGuild's accounting data for all time.", file=file, ephemeral=ephemeral)
     return await interaction.response.send_message("Could not determine the intent of your question.", file=file, ephemeral=ephemeral)
 
 

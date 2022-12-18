@@ -19,8 +19,8 @@ class CalculateTokenBalances:
         token_stats = self.calculated_token_balances[token_address]
         self.calculated_token_balances[token_address] = {
             'out': token_stats['out'],
-            'in': token_stats['in'] + int(in_value),
-            'balance': token_stats['balance'] + int(in_value),
+            'in': token_stats['in'] + in_value,
+            'balance': token_stats['balance'] + in_value,
         }
 
     def increment_outflow(self, token_address, out_value):
@@ -28,8 +28,8 @@ class CalculateTokenBalances:
         token_stats = self.calculated_token_balances[token_address]
         self.calculated_token_balances[token_address] = {
             'in': token_stats['in'],
-            'out': token_stats['out'] + int(out_value),
-            'balance': token_stats['balance'] - int(out_value),
+            'out': token_stats['out'] + out_value,
+            'balance': token_stats['balance'] - out_value,
         }
 
     def get_balances(self):

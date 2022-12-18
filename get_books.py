@@ -1,8 +1,8 @@
 # All credit to @midgerate, @xivanc, and @daniel-ivanco for the original code
-
 import os
 import json
 import csv
+from web3 import Web3
 from gql import Client, gql
 from gql.transport.aiohttp import AIOHTTPTransport
 from dotenv import load_dotenv
@@ -93,6 +93,10 @@ async def get_treasury_transactions():
         token_value = abs(int(calculated_token_balances.get_balance(
             moloch_stats_balance['tokenAddress'])) - int(moloch_stats_balance['balance']))
 
+        formatted_value = int(token_value)
+        if moloch_stats_balance['tokenSymbol'] == 'WXDAI':
+            formatted_value = Web3.fromWei(int(token_value), 'ether')
+
         if moloch_stats_balance['payment'] is False and moloch_stats_balance['tribute'] is False:
             balances = {
                 'in': 0,
@@ -104,7 +108,7 @@ async def get_treasury_transactions():
                 token_value
             )
             balances = {
-                'in': token_value,
+                'in': formatted_value,
                 'out': 0,
             }
 
@@ -115,7 +119,7 @@ async def get_treasury_transactions():
             )
             balances = {
                 'in': 0,
-                'out': token_value,
+                'out': formatted_value,
             }
 
         tx_explorer_link = f"https://blockscout.com/xdai/mainnet/tx/{moloch_stats_balance['transactionHash']}"

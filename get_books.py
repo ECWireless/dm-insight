@@ -1,4 +1,4 @@
-# All credit to @midgerate, @xivanc, and @daniel-ivanco for the original code
+# All credit to @midgerate, @xivanc, @daniel-ivanco, and the DAOHaus team for the original code
 import os
 import json
 import csv

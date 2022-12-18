@@ -2,7 +2,6 @@
 import os
 import json
 import csv
-from web3 import Web3
 from gql import Client, gql
 from gql.transport.aiohttp import AIOHTTPTransport
 from dotenv import load_dotenv
@@ -95,7 +94,7 @@ async def get_treasury_transactions():
 
         formatted_value = int(token_value)
         if moloch_stats_balance['tokenSymbol'] == 'WXDAI':
-            formatted_value = Web3.fromWei(int(token_value), 'ether')
+            formatted_value = int(token_value) / 10 ** 18
 
         if moloch_stats_balance['payment'] is False and moloch_stats_balance['tribute'] is False:
             balances = {

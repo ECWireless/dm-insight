@@ -2,6 +2,7 @@
 import os
 import json
 import csv
+from datetime import datetime
 from gql import Client, gql
 from gql.transport.aiohttp import AIOHTTPTransport
 from dotenv import load_dotenv
@@ -142,7 +143,7 @@ async def get_treasury_transactions():
 
         return {
             **balances,
-            'date': moloch_stats_balance['timestamp'],
+            'date': datetime.fromtimestamp(int(moloch_stats_balance['timestamp'])),
             'type': moloch_stats_balance['action'].capitalize(),
             'tokenSymbol': moloch_stats_balance['tokenSymbol'],
             'tokenDecimals': moloch_stats_balance['tokenDecimals'],
@@ -156,10 +157,16 @@ async def get_treasury_transactions():
     return list(map(map_balances, moloch_stats_balances))
 
 
-async def get_treasury_details():
+async def get_treasury_details(year):
     unsorted_treasury_transactions = await get_treasury_transactions()
     treasury_transactions = sorted(
         unsorted_treasury_transactions, key=lambda k: k['date'], reverse=True)
+
+    if year:
+        year_unix_start = datetime(int(year), 1, 1).timestamp()
+        year_unix_end = datetime(int(year), 12, 31).timestamp()
+        treasury_transactions = list(
+            filter(lambda x: x['date'].timestamp() >= year_unix_start and x['date'].timestamp() <= year_unix_end, treasury_transactions))
 
     return {
         # 'daoMetadata': daoMeta,
@@ -176,28 +183,28 @@ async def get_treasury_details():
 def write_to_csv(data):
     with open('rg_treasury.csv', 'w', newline='', encoding='utf-8') as csvfile:
         rg_treasury = csv.writer(csvfile, delimiter=',')
-        rg_treasury.writerow(['Txn Hash', 'Timestamp', 'Type', 'Shares',
+        rg_treasury.writerow(['Txn Hash', 'Date', 'Type', 'Shares',
                              'Loot', 'Applicant', 'Title', 'Token', 'In', 'Out'])
         for row in data:
             if row['proposal'] == {}:
-                rg_treasury.writerow([row['txHash'], row['date'], row['type'],
+                rg_treasury.writerow([row['txHash'], row['date'].strftime('%m-%m-%Y'), row['type'],
                                      '', '', '', '', row['tokenSymbol'], row['in'], row['out']])
             else:
-                rg_treasury.writerow([row['txHash'], row['date'], row['type'], row['proposal']['shares'],
+                rg_treasury.writerow([row['txHash'], row['date'].strftime('%m-%m-%Y'), row['type'], row['proposal']['shares'],
                                       row['proposal']['loot'], row['proposal']['applicant'], row['proposal']['title'], row['tokenSymbol'], row['in'], row['out']])
 
 
 def format_as_csv(data):
-    csv_text = 'Txn Hash,Timestamp,Type,Shares,Loot,Applicant,Title,Token,In,Out\n'
+    csv_text = 'Txn Hash,Date,Type,Shares,Loot,Applicant,Title,Token,In,Out\n'
     for row in data:
         if row['proposal'] == {}:
-            csv_text += f"{row['txHash']},{row['date']},{row['type']},,,,,{row['tokenSymbol']},{row['in']},{row['out']}\n"
+            csv_text += f"{row['txHash']},{row['date'].strftime('%m-%m-%Y')},{row['type']},,,,,{row['tokenSymbol']},{row['in']},{row['out']}\n"
         else:
-            csv_text += f"{row['txHash']},{row['date']},{row['type']},{row['proposal']['shares']},{row['proposal']['loot']},{row['proposal']['applicant']},{row['proposal']['title']},{row['tokenSymbol']},{row['in']},{row['out']}\n"
+            csv_text += f"{row['txHash']},{row['date'].strftime('%m-%m-%Y')},{row['type']},{row['proposal']['shares']},{row['proposal']['loot']},{row['proposal']['applicant']},{row['proposal']['title']},{row['tokenSymbol']},{row['in']},{row['out']}\n"
     return csv_text
 
 
-async def get_treasury_csv():
-    treasury_details = await get_treasury_details()
+async def get_treasury_csv(year):
+    treasury_details = await get_treasury_details(year)
     write_to_csv(treasury_details['transactions'])
     return format_as_csv(treasury_details['transactions'])

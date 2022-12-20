@@ -58,7 +58,7 @@ async def ask_command(interaction, question, ephemeral):
             ephemeral=ephemeral,
             suppress_embeds=True
         )
-    return await interaction.response.send_message("Could not determine the intent of your question.", file=file, ephemeral=ephemeral)
+    return await interaction.response.send_message("Could not determine the intent of your question.", ephemeral=ephemeral)
 
 
 @tree.command(name="ask", description="Ask any question about the DAO. This will be visible to everyone.", guild=discord.Object(id=GUILD_ID))

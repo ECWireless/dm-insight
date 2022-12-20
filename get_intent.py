@@ -59,10 +59,6 @@ async def detect_intent_texts(agent, session_id, question, language_code):
         " ".join(msg.text.text) for msg in response.query_result.response_messages
     ]
     # print(f"Response text: {' '.join(response_messages)}\n")
-    if 'get_member' in response_messages:
-        return 'get_member'
-    if 'get_all_members' in response_messages:
-        return 'get_all_members'
-    if 'get_books' in response_messages:
-        return 'get_books'
-    return False
+    if response_messages[0] is None:
+        return ''
+    return response_messages[0]

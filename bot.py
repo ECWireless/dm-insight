@@ -45,12 +45,15 @@ async def ask_command(interaction, question, ephemeral):
         buffer = io.BytesIO(members.encode())
         file = discord.File(buffer, filename="members_data.csv")
         return await interaction.response.send_message(f"Original question: *{question}*\n\nHere is the data for all members.", file=file, ephemeral=ephemeral)
-    elif intent == 'get_books':
-        treasury_csv = await get_treasury_csv()
+    elif intent.startswith('get_books'):
+        year = intent.split(' ')[1]
+        if (year == '$intent.params.date-period'):
+            year = None
+        treasury_csv = await get_treasury_csv(year)
         buffer = io.BytesIO(treasury_csv.encode())
         file = discord.File(buffer, filename="rg_treasury.csv")
         return await interaction.response.send_message(
-            f"Original question: *{question}*\n\nHere is RaidGuild's accounting data for all time.\n\nYou can view more details here: https://books.daohaus.club/#/dao/{DAO_ADDRESS}/treasury",
+            f"Original question: *{question}*\n\nHere is RaidGuild's accounting data for {year or 'all time'}.\n\nYou can view more details here: https://books.daohaus.club/#/dao/{DAO_ADDRESS}/treasury",
             file=file,
             ephemeral=ephemeral,
             suppress_embeds=True
@@ -58,7 +61,7 @@ async def ask_command(interaction, question, ephemeral):
     return await interaction.response.send_message("Could not determine the intent of your question.", file=file, ephemeral=ephemeral)
 
 
-@tree.command(name="ask_public", description="Ask any question about the DAO. This will be visible to everyone.", guild=discord.Object(id=GUILD_ID))
+@tree.command(name="ask", description="Ask any question about the DAO. This will be visible to everyone.", guild=discord.Object(id=GUILD_ID))
 async def ask_command_public(interaction, question: str):
     return await ask_command(interaction, question, False)
 

@@ -58,6 +58,36 @@ async def ask_command(interaction, question, ephemeral):
             ephemeral=ephemeral,
             suppress_embeds=True
         )
+    elif intent == 'link_website':
+        return await interaction.response.send_message(
+            f"Original question: *{question}*\n\nHere is the link to RaidGuild's website: https://raidguild.org",
+            ephemeral=ephemeral,
+            suppress_embeds=True
+        )
+    elif intent == 'link_handbook':
+        return await interaction.response.send_message(
+            f"Original question: *{question}*\n\nHere is the link to RaidGuild's handbook: https://handbook.raidguild.org",
+            ephemeral=ephemeral,
+            suppress_embeds=True
+        )
+    elif intent == 'link_bids':
+        return await interaction.response.send_message(
+            f"Original question: *{question}*\n\nHere is the link to RaidGuild's Consultation Queue: https://bids.raidguild.org",
+            ephemeral=ephemeral,
+            suppress_embeds=True
+        )
+    elif intent == 'join_raidguild':
+        return await interaction.response.send_message(
+            f"Original question: *{question}*\n\nHere is the link to start the process of joining RaidGuild: https://raidguild.org/join",
+            ephemeral=ephemeral,
+            suppress_embeds=True
+        )
+    elif intent == 'hire_raidguild':
+        return await interaction.response.send_message(
+            f"Original question: *{question}*\n\nHere is the link to start the process of hiring RaidGuild: https://raidguild.org/hire",
+            ephemeral=ephemeral,
+            suppress_embeds=True
+        )
     return await interaction.response.send_message("Could not determine the intent of your question.", ephemeral=ephemeral)
 
 

@@ -95,7 +95,7 @@ async def get_treasury_transactions():
 
         formatted_value = int(token_value)
         if moloch_stats_balance['tokenSymbol'] == 'WXDAI':
-            formatted_value = int(token_value) / 10 ** 18
+            formatted_value = round(int(token_value) / 10 ** 18, 2)
 
         if moloch_stats_balance['payment'] is False and moloch_stats_balance['tribute'] is False:
             balances = {
@@ -160,7 +160,7 @@ async def get_treasury_transactions():
 async def get_treasury_details(year):
     unsorted_treasury_transactions = await get_treasury_transactions()
     treasury_transactions = sorted(
-        unsorted_treasury_transactions, key=lambda k: k['date'], reverse=True)
+        unsorted_treasury_transactions, key=lambda k: k['date'].timestamp(), reverse=True)
 
     if year:
         year_unix_start = datetime(int(year), 1, 1).timestamp()
@@ -187,20 +187,20 @@ def write_to_csv(data):
                              'Loot', 'Applicant', 'Title', 'Token', 'In', 'Out'])
         for row in data:
             if row['proposal'] == {}:
-                rg_treasury.writerow([row['txHash'], row['date'].strftime('%m-%m-%Y'), row['type'],
+                rg_treasury.writerow([row['txHash'], row['date'].strftime('%m-%d-%Y'), row['type'],
                                      '', '', '', '', row['tokenSymbol'], row['in'], row['out']])
             else:
-                rg_treasury.writerow([row['txHash'], row['date'].strftime('%m-%m-%Y'), row['type'], row['proposal']['shares'],
+                rg_treasury.writerow([row['txHash'], row['date'].strftime('%m-%d-%Y'), row['type'], row['proposal']['shares'],
                                       row['proposal']['loot'], row['proposal']['applicant'], row['proposal']['title'], row['tokenSymbol'], row['in'], row['out']])
 
 
 def format_as_csv(data):
-    csv_text = 'Txn Hash,Date,Type,Shares,Loot,Applicant,Title,Token,In,Out\n'
+    csv_text = 'Tx Hash,Date,Type,Shares,Loot,Applicant,Title,Token,In,Out\n'
     for row in data:
         if row['proposal'] == {}:
-            csv_text += f"{row['txHash']},{row['date'].strftime('%m-%m-%Y')},{row['type']},,,,,{row['tokenSymbol']},{row['in']},{row['out']}\n"
+            csv_text += f"{row['txHash']},{row['date'].strftime('%m-%d-%Y')},{row['type']},,,,,{row['tokenSymbol']},{row['in']},{row['out']}\n"
         else:
-            csv_text += f"{row['txHash']},{row['date'].strftime('%m-%m-%Y')},{row['type']},{row['proposal']['shares']},{row['proposal']['loot']},{row['proposal']['applicant']},{row['proposal']['title']},{row['tokenSymbol']},{row['in']},{row['out']}\n"
+            csv_text += f"{row['txHash']},{row['date'].strftime('%m-%d-%Y')},{row['type']},{row['proposal']['shares']},{row['proposal']['loot']},{row['proposal']['applicant']},{row['proposal']['title']},{row['tokenSymbol']},{row['in']},{row['out']}\n"
     return csv_text
 
 

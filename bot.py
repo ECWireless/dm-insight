@@ -10,6 +10,7 @@ from get_member import get_member
 from get_members import get_all_members
 from get_intent import run_intent_session
 from get_books import get_treasury_csv
+from get_dm_members import get_all_dm_members
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -33,9 +34,11 @@ async def ask_command(interaction, question, ephemeral):
             return await interaction.response.send_message(f"Original question: *{question}*\n\nNot a member!", ephemeral=ephemeral)
         address = addresses[0]
         member = await get_member(address)
+        dm_members = await get_all_dm_members()
+        discord_handle = dm_members.get(address.lower(), "")
         if member:
             return await interaction.response.send_message(
-                f"Original question: *{question}*\n\nMember address: {member['id']}\nDate joined: {datetime.fromtimestamp(int(member['dateJoined']) / 1000).strftime('%m-%d-%Y')}\nShares: {member['shares']}\nLoot: {member['loot']}\nJailed: {member['jailed']}\n\nVisit https://app.daohaus.club/dao/0x64/0xfe1084bc16427e5eb7f13fc19bcd4e641f7d571f/profile/{member['id']} to view profile.",
+                f"Original question: *{question}*\n\nMember address: {member['id']}\nDiscord handle: {discord_handle}\nDate joined: {datetime.fromtimestamp(int(member['dateJoined']) / 1000).strftime('%m-%d-%Y')}\nShares: {member['shares']}\nLoot: {member['loot']}\nJailed: {member['jailed']}\n\nVisit https://app.daohaus.club/dao/0x64/0xfe1084bc16427e5eb7f13fc19bcd4e641f7d571f/profile/{member['id']} to view profile.",
                 ephemeral=ephemeral,
                 suppress_embeds=True
             )

@@ -1,5 +1,6 @@
 from gql import Client, gql
 from gql.transport.aiohttp import AIOHTTPTransport
+from get_dm_members import get_all_dm_members
 
 query = gql(
     """
@@ -18,10 +19,11 @@ transport = AIOHTTPTransport(
 )
 
 
-def format_all_members_for_CSV(members):
-    data = "address,shares\n"
+def format_all_members_for_CSV(members, dm_members={}):
+    data = "Address,Shares,Discord Handle\n"
     for member in members:
-        data += f"{member['id']},{member['shares']}\n"
+        discord_handle = dm_members.get(member['id'].lower(), "")
+        data += f"{member['id']},{member['shares']},{discord_handle}\n"
     return data
 
 
@@ -32,9 +34,10 @@ async def get_all_members():
     ) as session:
         try:
             result = await session.execute(query)
+            dm_members = await get_all_dm_members()
             members = result["members"]
             if members:
-                return format_all_members_for_CSV(members)
+                return format_all_members_for_CSV(members, dm_members)
             return format_all_members_for_CSV([])
         except:
             return format_all_members_for_CSV([])

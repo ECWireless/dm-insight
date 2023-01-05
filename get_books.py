@@ -7,6 +7,7 @@ from gql import Client, gql
 from gql.transport.aiohttp import AIOHTTPTransport
 from dotenv import load_dotenv
 from calculate_token_balances import CalculateTokenBalances
+from get_dm_members import get_all_dm_members
 
 load_dotenv()
 DAO_ADDRESS = os.getenv("DAO_ADDRESS")
@@ -82,6 +83,7 @@ async def retrieve_all_balances():
 
 async def get_treasury_transactions():
     moloch_stats_balances = await retrieve_all_balances()
+    dm_members = await get_all_dm_members()
 
     calculated_token_balances = CalculateTokenBalances()
 
@@ -137,6 +139,7 @@ async def get_treasury_transactions():
                 'shares': moloch_stats_balance['proposalDetail']['sharesRequested'],
                 'loot': moloch_stats_balance['proposalDetail']['lootRequested'],
                 'applicant': moloch_stats_balance['proposalDetail']['applicant'],
+                'applicantDiscord': dm_members.get(moloch_stats_balance['proposalDetail']['applicant'].lower(), ''),
                 'proposalLink': proposal_link,
                 'title': proposal_title,
             }
@@ -184,23 +187,23 @@ def write_to_csv(data):
     with open('rg_treasury.csv', 'w', newline='', encoding='utf-8') as csvfile:
         rg_treasury = csv.writer(csvfile, delimiter=',')
         rg_treasury.writerow(['Txn Hash', 'Date', 'Type', 'Shares',
-                             'Loot', 'Applicant', 'Title', 'Token', 'In', 'Out'])
+                             'Loot', 'Applicant', 'Applicant Discord Handle', 'Title', 'Token', 'In', 'Out'])
         for row in data:
             if row['proposal'] == {}:
                 rg_treasury.writerow([row['txHash'], row['date'].strftime('%m-%d-%Y'), row['type'],
-                                     '', '', '', '', row['tokenSymbol'], row['in'], row['out']])
+                                     '', '', '', '', '', row['tokenSymbol'], row['in'], row['out']])
             else:
                 rg_treasury.writerow([row['txHash'], row['date'].strftime('%m-%d-%Y'), row['type'], row['proposal']['shares'],
-                                      row['proposal']['loot'], row['proposal']['applicant'], row['proposal']['title'], row['tokenSymbol'], row['in'], row['out']])
+                                      row['proposal']['loot'], row['proposal']['applicant'], row['proposal']['applicantDiscord'], row['proposal']['title'], row['tokenSymbol'], row['in'], row['out']])
 
 
 def format_as_csv(data):
-    csv_text = 'Tx Hash,Date,Type,Shares,Loot,Applicant,Title,Token,In,Out\n'
+    csv_text = 'Tx Hash,Date,Type,Shares,Loot,Applicant,Applicant Discord Handle,Title,Token,In,Out\n'
     for row in data:
         if row['proposal'] == {}:
-            csv_text += f"{row['txHash']},{row['date'].strftime('%m-%d-%Y')},{row['type']},,,,,{row['tokenSymbol']},{row['in']},{row['out']}\n"
+            csv_text += f"{row['txHash']},{row['date'].strftime('%m-%d-%Y')},{row['type']},,,,,,{row['tokenSymbol']},{row['in']},{row['out']}\n"
         else:
-            csv_text += f"{row['txHash']},{row['date'].strftime('%m-%d-%Y')},{row['type']},{row['proposal']['shares']},{row['proposal']['loot']},{row['proposal']['applicant']},{row['proposal']['title']},{row['tokenSymbol']},{row['in']},{row['out']}\n"
+            csv_text += f"{row['txHash']},{row['date'].strftime('%m-%d-%Y')},{row['type']},{row['proposal']['shares']},{row['proposal']['loot']},{row['proposal']['applicant']},{row['proposal']['applicantDiscord']},{row['proposal']['title']},{row['tokenSymbol']},{row['in']},{row['out']}\n"
     return csv_text
 
 

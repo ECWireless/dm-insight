@@ -17,6 +17,7 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 GUILD_ID = os.getenv("DISCORD_GUILD_ID")
 GUILD_NAME = os.getenv("DISCORD_GUILD_NAME")
 DAO_ADDRESS = os.getenv("DAO_ADDRESS")
+MAINNET_DAO_ADDRESS = os.getenv("MAINNET_DAO_ADDRESS")
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -57,6 +58,19 @@ async def ask_command(interaction, question, ephemeral):
         file = discord.File(buffer, filename="rg_treasury.csv")
         return await interaction.response.send_message(
             f"Original question: *{question}*\n\nHere is RaidGuild's accounting data for {year or 'all time'}.\n\nYou can view more details here: https://books.daohaus.club/#/dao/{DAO_ADDRESS}/treasury",
+            file=file,
+            ephemeral=ephemeral,
+            suppress_embeds=True
+        )
+    elif intent.startswith('get_mainnet_books'):
+        year = intent.split(' ')[1]
+        if (year == '$intent.params.date-period'):
+            year = None
+        treasury_csv = await get_treasury_csv(year, True)
+        buffer = io.BytesIO(treasury_csv.encode())
+        file = discord.File(buffer, filename="mainnet_rg_treasury.csv")
+        return await interaction.response.send_message(
+            f"Original question: *{question}*\n\nHere is RaidGuild's mainnet accounting data for {year or 'all time'}.\n\nYou can view more details here: https://books.daohaus.club/#/dao/{MAINNET_DAO_ADDRESS}/treasury",
             file=file,
             ephemeral=ephemeral,
             suppress_embeds=True

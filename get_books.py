@@ -11,6 +11,7 @@ from get_dm_members import get_all_dm_members
 
 load_dotenv()
 DAO_ADDRESS = os.getenv("DAO_ADDRESS")
+MAINNET_DAO_ADDRESS = os.getenv("MAINNET_DAO_ADDRESS")
 
 balancesQuery = gql(
     """
@@ -50,13 +51,17 @@ balancesTransport = AIOHTTPTransport(
     url="https://api.thegraph.com/subgraphs/name/odyssy-automaton/daohaus-stats-xdai"
 )
 
+mainnetBalancesTransport = AIOHTTPTransport(
+    url="https://api.thegraph.com/subgraphs/name/odyssy-automaton/daohaus-stats"
+)
+
 PAGINATE_COUNT = 1000
 
 
-async def retrieve_all_balances():
+async def retrieve_all_balances(mainnet):
     async def fetch_balances(session, skip, all_balances):
         params = {
-            "molochAddress": DAO_ADDRESS,
+            "molochAddress": MAINNET_DAO_ADDRESS if mainnet else DAO_ADDRESS,
             "first": PAGINATE_COUNT,
             "skip": skip,
         }
@@ -71,7 +76,7 @@ async def retrieve_all_balances():
         return moloch_stats_balances['balances']
 
     async with Client(
-        transport=balancesTransport,
+        transport=mainnetBalancesTransport if mainnet else balancesTransport,
         fetch_schema_from_transport=True,
     ) as session:
         try:
@@ -81,8 +86,8 @@ async def retrieve_all_balances():
             return None
 
 
-async def get_treasury_transactions():
-    moloch_stats_balances = await retrieve_all_balances()
+async def get_treasury_transactions(mainnet):
+    moloch_stats_balances = await retrieve_all_balances(mainnet)
     dm_members = await get_all_dm_members()
 
     calculated_token_balances = CalculateTokenBalances()
@@ -133,7 +138,7 @@ async def get_treasury_transactions():
             details = json.loads(details_data)
             proposal_title = details['title']
             proposal_id = moloch_stats_balance['proposalDetail']['proposalId']
-            proposal_link = f"https://app.daohaus.club/dao/0x64/{DAO_ADDRESS}/proposals/{proposal_id}"
+            proposal_link = f"https://app.daohaus.club/dao/{'0x1' if mainnet else '0x64'}/{MAINNET_DAO_ADDRESS if mainnet else DAO_ADDRESS}/proposals/{proposal_id}"
             proposal = {
                 'id': proposal_id,
                 'shares': moloch_stats_balance['proposalDetail']['sharesRequested'],
@@ -160,8 +165,8 @@ async def get_treasury_transactions():
     return list(map(map_balances, moloch_stats_balances))
 
 
-async def get_treasury_details(year):
-    unsorted_treasury_transactions = await get_treasury_transactions()
+async def get_treasury_details(year, mainnet):
+    unsorted_treasury_transactions = await get_treasury_transactions(mainnet)
     treasury_transactions = sorted(
         unsorted_treasury_transactions, key=lambda k: k['date'].timestamp(), reverse=True)
 
@@ -207,7 +212,7 @@ def format_as_csv(data):
     return csv_text
 
 
-async def get_treasury_csv(year):
-    treasury_details = await get_treasury_details(year)
+async def get_treasury_csv(year, mainnet=False):
+    treasury_details = await get_treasury_details(year, mainnet)
     write_to_csv(treasury_details['transactions'])
     return format_as_csv(treasury_details['transactions'])

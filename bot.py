@@ -28,6 +28,10 @@ tree = app_commands.CommandTree(client)
 
 async def ask_command(interaction, question, ephemeral):
     intent = await run_intent_session(question)
+    if intent == 'get_dao_address':
+        return await interaction.response.send_message(f"Original question: *{question}*\n\nDAO address: {DAO_ADDRESS}", ephemeral=ephemeral)
+    if intent == 'get_mainnet_dao_address':
+        return await interaction.response.send_message(f"Original question: *{question}*\n\nMainnet DAO address: {MAINNET_DAO_ADDRESS}", ephemeral=ephemeral)
     if intent == 'get_member':
         addresses = re.findall(
             pattern='0x[a-fA-F0-9]{40}$', string=question.replace("?", ""))
@@ -44,12 +48,12 @@ async def ask_command(interaction, question, ephemeral):
                 suppress_embeds=True
             )
         return await interaction.response.send_message(f"Original question: *{question}*\n\nNot a member!", ephemeral=ephemeral)
-    elif intent == 'get_all_members':
+    if intent == 'get_all_members':
         members = await get_all_members()
         buffer = io.BytesIO(members.encode())
         file = discord.File(buffer, filename="members_data.csv")
         return await interaction.response.send_message(f"Original question: *{question}*\n\nHere is the data for all members.", file=file, ephemeral=ephemeral)
-    elif intent.startswith('get_books'):
+    if intent.startswith('get_books'):
         year = intent.split(' ')[1]
         if (year == '$intent.params.date-period'):
             year = None
@@ -62,7 +66,7 @@ async def ask_command(interaction, question, ephemeral):
             ephemeral=ephemeral,
             suppress_embeds=True
         )
-    elif intent.startswith('get_mainnet_books'):
+    if intent.startswith('get_mainnet_books'):
         year = intent.split(' ')[1]
         if (year == '$intent.params.date-period'):
             year = None
@@ -75,31 +79,31 @@ async def ask_command(interaction, question, ephemeral):
             ephemeral=ephemeral,
             suppress_embeds=True
         )
-    elif intent == 'link_website':
+    if intent == 'link_website':
         return await interaction.response.send_message(
             f"Original question: *{question}*\n\nHere is the link to RaidGuild's website: https://raidguild.org",
             ephemeral=ephemeral,
             suppress_embeds=True
         )
-    elif intent == 'link_handbook':
+    if intent == 'link_handbook':
         return await interaction.response.send_message(
             f"Original question: *{question}*\n\nHere is the link to RaidGuild's handbook: https://handbook.raidguild.org",
             ephemeral=ephemeral,
             suppress_embeds=True
         )
-    elif intent == 'link_bids':
+    if intent == 'link_bids':
         return await interaction.response.send_message(
             f"Original question: *{question}*\n\nHere is the link to RaidGuild's Consultation Queue: https://bids.raidguild.org",
             ephemeral=ephemeral,
             suppress_embeds=True
         )
-    elif intent == 'join_raidguild':
+    if intent == 'join_raidguild':
         return await interaction.response.send_message(
             f"Original question: *{question}*\n\nHere is the link to start the process of joining RaidGuild: https://raidguild.org/join",
             ephemeral=ephemeral,
             suppress_embeds=True
         )
-    elif intent == 'hire_raidguild':
+    if intent == 'hire_raidguild':
         return await interaction.response.send_message(
             f"Original question: *{question}*\n\nHere is the link to start the process of hiring RaidGuild: https://raidguild.org/hire",
             ephemeral=ephemeral,

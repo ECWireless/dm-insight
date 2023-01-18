@@ -30,8 +30,8 @@ async def ask_command(interaction, question, ephemeral):
     intent = await run_intent_session(question)
     if intent == 'get_dao_address':
         return await interaction.response.send_message(f"Original question: *{question}*\n\nDAO address: {DAO_ADDRESS}", ephemeral=ephemeral)
-    # if intent == 'get_mainnet_dao_address':
-    #     return await interaction.response.send_message(f"Original question: *{question}*\n\nMainnet DAO address: {MAINNET_DAO_ADDRESS}", ephemeral=ephemeral)
+    if intent == 'get_mainnet_dao_address':
+        return await interaction.response.send_message(f"Original question: *{question}*\n\nMainnet DAO address: {MAINNET_DAO_ADDRESS}", ephemeral=ephemeral)
     if intent == 'get_member':
         addresses = re.findall(
             pattern='0x[a-fA-F0-9]{40}$', string=question.replace("?", ""))

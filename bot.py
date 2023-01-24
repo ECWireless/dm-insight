@@ -109,6 +109,12 @@ async def ask_command(interaction, question, ephemeral):
             ephemeral=ephemeral,
             suppress_embeds=True
         )
+    if intent == 'link_charmverse':
+        return await interaction.response.send_message(
+            f"Original question: *{question}*\n\nHere is the link to the RaidGuild's CharmVerse page: https://app.charmverse.io/raid-guild",
+            ephemeral=ephemeral,
+            suppress_embeds=True
+        )
     return await interaction.response.send_message("Could not determine the intent of your question.", ephemeral=ephemeral)
 
 
